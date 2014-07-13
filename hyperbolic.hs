@@ -1,5 +1,9 @@
 import Text.PrettyPrint.Boxes
 
+average x = s/n
+  where n = fromIntegral $ length x
+        s = sum x
+
 -- hyperbole a a == 1
 -- hyperbole 1 a == a
 -- hyperbole a 0 == Infinity
@@ -21,10 +25,11 @@ priceTable = vcat left $ map priceLine [1..hoursPerWeek]
 
 printPriceTable = printBox priceTable
 
-priceForInterval x = sum $ map (h . cheapest) x
-  where h = hyperbole multiplier
+toPrice = (hyperbole multiplier) . cheapest
+
+toPrices = map toPrice
+
+priceForInterval = sum . toPrices
 
 -- | Given an interval of hours, calculate the corresponding average hour price
-hourlyPriceForInterval x = s/n
-  where n = fromIntegral $ length x
-        s = priceForInterval x
+hourlyPriceForInterval = average . toPrices
