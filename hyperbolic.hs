@@ -7,6 +7,7 @@ average x = s/n
 -- hyperbole a a == 1
 -- hyperbole 1 a == a
 -- hyperbole a 0 == Infinity
+hyperbole :: Float -> Float -> Float
 hyperbole k x = k/x
 
 hoursPerWeek = 40
@@ -25,13 +26,28 @@ priceTable = vcat left $ map priceLine [1..hoursPerWeek]
 
 printPriceTable = printBox priceTable
 
-toPrice = (hyperbole multiplier) . cheapest
+toPrice :: Int -> Float
+toPrice = (hyperbole multiplier) . cheapest . fromIntegral
 
 toPrices = map toPrice
 
-priceForInterval = sum . toPrices
+putAllStrLn :: [String] -> IO [()]
+putAllStrLn x = sequence $ map putStrLn x
+
+pricesForInterval :: [Int] -> [String]
+pricesForInterval x = [weekly, hourly, monthly]
+  where prices = toPrices x
+        weeklyPrice = sum prices
+        hourlyPrice = average prices
+        monthlyPrice = weeklyPrice * 4
+        pre s v = s ++ ": " ++ (show v) -- present
+        weekly = pre "weekly" weeklyPrice
+        hourly = pre "hourly" hourlyPrice
+        monthly = pre "monthly" monthlyPrice
+
+intervalInfo = putAllStrLn . pricesForInterval
 
 -- | Given an interval of hours, calculate the corresponding average hour price
 hourlyPriceForInterval = average . toPrices
 
-main = do printPriceTable
+-- main = do printPriceTable
