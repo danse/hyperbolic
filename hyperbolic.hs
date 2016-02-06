@@ -50,4 +50,4 @@ intervalInfo = putAllStrLn . pricesForInterval
 -- | Given an interval of hours, calculate the corresponding average hour price
 hourlyPriceForInterval = average . toPrices
 
--- main = do printPriceTable
+main = printPriceTable
