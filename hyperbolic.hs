@@ -4,11 +4,11 @@ average x = s/n
   where n = fromIntegral $ length x
         s = sum x
 
--- hyperbole a a == 1
--- hyperbole 1 a == a
--- hyperbole a 0 == Infinity
-hyperbole :: Float -> Float -> Float
-hyperbole k x = k/x
+-- hyperbola a a == 1
+-- hyperbola 1 a == a
+-- hyperbola a 0 == Infinity
+hyperbola :: Float -> Float -> Float
+hyperbola k x = k/x
 
 hoursPerWeek = 40
 
@@ -18,7 +18,7 @@ multiplier = 330
 
 priceLine hour = (b employedHours) <+> (b hourPrice) <+> (b monthPrice)
   where employedHours = cheapest hour
-        hourPrice = hyperbole multiplier hour
+        hourPrice = hyperbola multiplier hour
         monthPrice = 4 * hoursPerWeek * hourPrice
         b = text . show
 
@@ -27,7 +27,7 @@ priceTable = vcat left $ map priceLine [1..hoursPerWeek]
 printPriceTable = printBox priceTable
 
 toPrice :: Int -> Float
-toPrice = (hyperbole multiplier) . cheapest . fromIntegral
+toPrice = (hyperbola multiplier) . cheapest . fromIntegral
 
 toPrices = map toPrice
 
