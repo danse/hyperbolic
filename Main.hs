@@ -23,7 +23,7 @@ coefficientMultiplier first last
   | otherwise    = 1/first + others
   where others = coefficientMultiplier (first+1) last
 
-hoursPerWeek = 40
+hoursPerWeek = 35
 
 cheapest hour = 41 - hour
 
