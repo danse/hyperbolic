@@ -1,14 +1,10 @@
 import Text.PrettyPrint.Boxes
 
+import Hyperbola
+
 average x = s/n
   where n = fromIntegral $ length x
         s = sum x
-
--- hyperbola a a == 1
--- hyperbola 1 a == a
--- hyperbola a 0 == Infinity
-hyperbola :: Float -> Float -> Float
-hyperbola k x = k/x
 
 hoursPerWeek = 40
 

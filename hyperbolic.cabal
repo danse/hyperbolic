@@ -22,3 +22,9 @@ executable hyperbolic
   build-depends:       base >=4.8 && <4.9, boxes
   -- hs-source-dirs:      
   default-language:    Haskell2010
+
+Test-Suite test
+           type: exitcode-stdio-1.0
+           main-is: Test.hs
+           build-depends: base, QuickCheck
+           default-language:    Haskell2010
