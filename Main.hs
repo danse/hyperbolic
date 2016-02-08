@@ -18,38 +18,36 @@ are interested in a small number of iterations though, corresponding
 to the number of hours which fit in a working week
 
 -}
-coefficientMultiplier first last
+harmonicSum first last
   | first > last = 0
   | otherwise    = 1/first + others
-  where others = coefficientMultiplier (first+1) last
+  where others = harmonicSum (first+1) last
 
 hoursPerWeek = 35
 
 cheapest hour = 41 - hour
 
-multiplier = 330
-
-priceLine hour = (b employedHours) <+> (b hourPrice) <+> (b monthPrice)
+priceLine mul hour = (b employedHours) <+> (b hourPrice) <+> (b monthPrice)
   where employedHours = cheapest hour
-        hourPrice = hyperbola multiplier hour
+        hourPrice = hyperbola mul hour
         monthPrice = 4 * hoursPerWeek * hourPrice
         b = text . show
 
-priceTable = vcat left $ map priceLine [1..hoursPerWeek]
+priceTable mul = vcat left $ map (priceLine mul) [1..hoursPerWeek]
 
-printPriceTable = printBox priceTable
+printPriceTable mul = printBox $ priceTable mul
 
-toPrice :: Int -> Float
-toPrice = (hyperbola multiplier) . cheapest . fromIntegral
+toPrice :: Float -> Int -> Float
+toPrice multiplier = (hyperbola multiplier) . cheapest . fromIntegral
 
-toPrices = map toPrice
+toPrices m = map (toPrice m)
 
 putAllStrLn :: [String] -> IO [()]
 putAllStrLn x = sequence $ map putStrLn x
 
-pricesForInterval :: [Int] -> [String]
-pricesForInterval x = [weekly, hourly, monthly]
-  where prices = toPrices x
+pricesForInterval :: Float -> [Int] -> [String]
+pricesForInterval m x = [weekly, hourly, monthly]
+  where prices = toPrices m x
         weeklyPrice = sum prices
         hourlyPrice = average prices
         monthlyPrice = weeklyPrice * 4
@@ -58,9 +56,9 @@ pricesForInterval x = [weekly, hourly, monthly]
         hourly = pre "hourly" hourlyPrice
         monthly = pre "monthly" monthlyPrice
 
-intervalInfo = putAllStrLn . pricesForInterval
+intervalInfo mul = putAllStrLn . (pricesForInterval mul)
 
 -- | Given an interval of hours, calculate the corresponding average hour price
-hourlyPriceForInterval = average . toPrices
+hourlyPriceForInterval mul = average . (toPrices mul)
 
-main = printPriceTable
+main = return ()
