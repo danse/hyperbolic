@@ -29,10 +29,14 @@ multiplierFromPayedInterval rate int =
   in totalPaid/totalWeight
 
 averageRate :: Float -> Interval -> Float
-averageRate mul (Interval {lastHour=lastHour, firstHour=firstHour}) = 
-  let hours = lastHour - firstHour + 1
-      totalPayment = sum $ map (hyperbola mul . fromIntegral) [firstHour..lastHour]
-  in totalPayment/(fromIntegral hours)
+averageRate mul (Interval { firstHour=firstHour, lastHour=lastHour }) = 
+  averageRateDiscontinuous mul [firstHour..lastHour]
+
+averageRateDiscontinuous :: Float -> [Int] -> Float
+averageRateDiscontinuous mul hours = 
+  let hoursNumber = length hours
+      totalPayment = sum $ map (hyperbola mul . fromIntegral) hours
+  in totalPayment/(fromIntegral hoursNumber)
 
 -- build an interval with the given amount of hours, allocating them
 -- in the middle of the week in order to free both cheaper and more
