@@ -2,7 +2,7 @@ module Intervals where
 
 import Hyperbola
 
-data Interval = Interval { firstHour :: Int, lastHour :: Int } deriving Show
+type Interval = [Int]
 
 {-
 
@@ -17,23 +17,17 @@ to the number of hours which fit in a working week
 
 -}
 harmonicSum :: Interval -> Float
-harmonicSum (Interval { firstHour=f, lastHour=l })
-  | f > l  = 0
-  | otherwise = (1/(fromIntegral f)) + others
-  where others = harmonicSum (Interval { firstHour=f+1, lastHour=l })
+harmonicSum []     = 0
+harmonicSum (x:xs) = 1/(fromIntegral x) + (harmonicSum xs)
 
 multiplierFromPayedInterval :: Float -> Interval -> Float
 multiplierFromPayedInterval rate int = 
   let totalWeight = harmonicSum int
-      totalPaid = rate * (fromIntegral ((lastHour int) - (firstHour int) + 1))
+      totalPaid = rate * (fromIntegral (length int))
   in totalPaid/totalWeight
 
 averageRate :: Float -> Interval -> Float
-averageRate mul (Interval { firstHour=firstHour, lastHour=lastHour }) = 
-  averageRateDiscontinuous mul [firstHour..lastHour]
-
-averageRateDiscontinuous :: Float -> [Int] -> Float
-averageRateDiscontinuous mul hours = 
+averageRate mul hours = 
   let hoursNumber = length hours
       totalPayment = sum $ map (hyperbola mul . fromIntegral) hours
   in totalPayment/(fromIntegral hoursNumber)
@@ -42,13 +36,13 @@ averageRateDiscontinuous mul hours =
 -- in the middle of the week in order to free both cheaper and more
 -- expensive hours. Prefer allocating cheaper hours if uneven
 --
--- >>> centeredInterval 34
--- Interval { firstHour: 1, lastHour: 34 }
+-- >>> centeredInterval 34 == [1..34]
+-- True
 --
--- >>> centeredInterval 6
--- Interval { firstHour: 14, lastHour: 20 }
+-- >>> centeredInterval 6 == [14..20]
+-- True
 centeredInterval :: Int -> Interval
-centeredInterval hours = Interval { firstHour=f, lastHour=l }
+centeredInterval hours = [f..l]
   where t = quot (hoursPerWeek - hours) 2
         f = t
         l = t + hours
