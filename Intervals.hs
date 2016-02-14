@@ -3,6 +3,11 @@ module Intervals where
 import Hyperbola
 
 type Interval = [Int]
+-- Rated interval. Kept short for better accessors
+data Rated = Rated {
+  ratedRate :: Float,
+  ratedInterval :: Interval
+  } deriving Show
 
 {-
 
@@ -20,16 +25,23 @@ harmonicSum :: Interval -> Float
 harmonicSum []     = 0
 harmonicSum (x:xs) = 1/(fromIntegral x) + (harmonicSum xs)
 
-multiplierFromPayedInterval :: Float -> Interval -> Float
-multiplierFromPayedInterval rate int = 
-  let totalWeight = harmonicSum int
-      totalPaid = rate * (fromIntegral (length int))
+multiplierFromInterval :: Float -> Interval -> Float
+multiplierFromInterval rate interval = 
+  let totalWeight = harmonicSum interval
+      totalPaid = rate * (fromIntegral (length interval))
   in totalPaid/totalWeight
 
+multiplierFromRated :: [Rated] -> Float
+multiplierFromRated rated =
+  let i = foldl (++) [] (map ratedInterval rated)
+      cumulate r = (ratedRate r)*(fromIntegral $ length $ ratedInterval r)
+      r = (sum (map cumulate rated))/(fromIntegral hoursPerWeek)
+    in multiplierFromInterval r i
+
 averageRate :: Float -> Interval -> Float
-averageRate mul hours = 
-  let hoursNumber = length hours
-      totalPayment = sum $ map (hyperbola mul . fromIntegral) hours
+averageRate mul interval = 
+  let hoursNumber = length interval
+      totalPayment = sum $ map (hyperbola mul . fromIntegral) interval
   in totalPayment/(fromIntegral hoursNumber)
 
 -- build an interval with the given amount of hours, allocating them
