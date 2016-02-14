@@ -60,3 +60,9 @@ centeredInterval hours = [f..l]
         l = t + hours
 
 hoursPerWeek = 35 :: Int
+
+secondAllocation :: Float -> Int -> Int -> Float
+secondAllocation rate busyHours hoursRequested =
+  let firstFreeHour = hoursPerWeek-busyHours
+      mul = multiplierFromRated [Rated rate [firstFreeHour+1..hoursPerWeek]]
+  in averageRate mul [firstFreeHour-hoursRequested+1..firstFreeHour]
