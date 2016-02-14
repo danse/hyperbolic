@@ -33,10 +33,9 @@ multiplierFromInterval rate interval =
 
 multiplierFromRated :: [Rated] -> Float
 multiplierFromRated rated =
-  let i = foldl (++) [] (map ratedInterval rated)
-      cumulate r = (ratedRate r)*(fromIntegral $ length $ ratedInterval r)
-      r = (sum (map cumulate rated))/(fromIntegral hoursPerWeek)
-    in multiplierFromInterval r i
+  let cumulate r = (ratedRate r)*(fromIntegral $ length $ ratedInterval r)
+      comulated = sum (map cumulate rated)
+    in multiplierFromInterval (r/(fromIntegral hoursPerWeek)) [1..hoursPerWeek]
 
 averageRate :: Float -> Interval -> Float
 averageRate mul interval = 
