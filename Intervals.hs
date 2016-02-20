@@ -41,10 +41,17 @@ multiplierFromInterval rate interval =
       totalPaid = rate * (fromIntegral (length interval))
   in totalPaid/totalWeight
 
-multiplierFromRated :: [Rated] -> Float
-multiplierFromRated rated =
-  let s = (ratedCost . mconcat) rated
-    in multiplierFromInterval (s/(fromIntegral targetHours)) [1..targetHours]
+multiplierFromRated r = multiplierFromInterval (ratedRate r) (ratedInterval r)
+
+adjustRateToTarget rated = Rated adjustedRate interval
+  where interval = ratedInterval rated
+        adjustedRate = (ratedCost rated)/(fromIntegral targetHours)
+
+multiplierFromRateds :: [Rated] -> Float
+multiplierFromRateds rated =
+  let concatenated = mconcat rated
+      adjusted = adjustRateToTarget concatenated
+  in multiplierFromRated adjusted
 
 averageRate :: Float -> Interval -> Float
 averageRate mul interval = 
@@ -74,5 +81,5 @@ targetHours = 4 * dailyHours -- the rest for studying etcetera
 secondAllocation :: Float -> Int -> Int -> Float
 secondAllocation rate busyHours hoursRequested =
   let firstFreeHour = hoursPerWeek-busyHours
-      mul = multiplierFromRated [Rated rate [firstFreeHour+1..hoursPerWeek]]
+      mul = multiplierFromRateds [Rated rate [firstFreeHour+1..hoursPerWeek]]
   in averageRate mul [firstFreeHour-hoursRequested+1..firstFreeHour]
