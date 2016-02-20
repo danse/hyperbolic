@@ -35,7 +35,7 @@ multiplierFromRated :: [Rated] -> Float
 multiplierFromRated rated =
   let cumulate r = (ratedRate r)*(fromIntegral $ length $ ratedInterval r)
       s = sum (map cumulate rated)
-    in multiplierFromInterval (s/(fromIntegral hoursPerWeek)) [1..hoursPerWeek]
+    in multiplierFromInterval (s/(fromIntegral targetHours)) [1..targetHours]
 
 averageRate :: Float -> Interval -> Float
 averageRate mul interval = 
@@ -58,7 +58,9 @@ centeredInterval hours = [f..l]
         f = t
         l = t + hours
 
-hoursPerWeek = 35 :: Int
+dailyHours = 7
+hoursPerWeek = 5 * dailyHours :: Int
+targetHours = 4 * dailyHours -- the rest for studying etcetera
 
 secondAllocation :: Float -> Int -> Int -> Float
 secondAllocation rate busyHours hoursRequested =
