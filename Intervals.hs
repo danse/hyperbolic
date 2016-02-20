@@ -9,6 +9,16 @@ data Rated = Rated {
   ratedInterval :: Interval
   } deriving Show
 
+ratedCost r = (ratedRate r) * (fromIntegral $ length $ ratedInterval r)
+
+combineRated a b = Rated averageRate sumOfIntervals
+  where sumOfIntervals = (ratedInterval a) ++ (ratedInterval b)
+        averageRate = ((ratedCost a) + (ratedCost b))/(fromIntegral $ length sumOfIntervals)
+
+instance Monoid Rated where
+  mempty = Rated 0 []
+  mappend = combineRated
+
 {-
 
 Let's say that i want to kwon the cumulative rate of hours between the
@@ -33,8 +43,7 @@ multiplierFromInterval rate interval =
 
 multiplierFromRated :: [Rated] -> Float
 multiplierFromRated rated =
-  let cumulate r = (ratedRate r)*(fromIntegral $ length $ ratedInterval r)
-      s = sum (map cumulate rated)
+  let s = (ratedCost . mconcat) rated
     in multiplierFromInterval (s/(fromIntegral targetHours)) [1..targetHours]
 
 averageRate :: Float -> Interval -> Float
