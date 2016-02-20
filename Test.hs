@@ -14,9 +14,9 @@ coefficientOneGivesIdentity a = (hyperbola a 1) == a :: Bool
 alwaysInfinityAtZero a = (a <= 0) || ((hyperbola a 0) == 1/0) :: Bool
 
 intervalsInverse a b c =
-  let int = Interval { firstHour=b, lastHour=c }
+  let int = [b..c]
       skip = (a <= 0) || (b <= 0) || (c <= 0) || (c < b)
-      diff = averageRate (multiplierFromPayedInterval a int) int - a
+      diff = averageRate (multiplierFromInterval a int) int - a
       prop = (abs diff) < 0.001
   in skip || prop
 
