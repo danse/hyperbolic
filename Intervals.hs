@@ -3,6 +3,8 @@ module Intervals where
 import Hyperbola
 
 type Interval = [Int]
+type Multiplier = Float
+
 -- Rated interval. Kept short for better accessors
 data Rated = Rated {
   ratedRate :: Float,
@@ -53,7 +55,7 @@ adjustRateToTarget rated = Rated adjustedRate interval
   where interval = ratedInterval rated
         adjustedRate = (ratedCost rated)/(fromIntegral targetHours)
 
-averageRate :: Float -> Interval -> Float
+averageRate :: Multiplier -> Interval -> Float
 averageRate mul interval = 
   let hoursNumber = length interval
       totalPayment = sum $ map (hyperbola mul . fromIntegral) interval
