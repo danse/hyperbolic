@@ -2,21 +2,22 @@ import Text.PrettyPrint.Boxes hiding ((*))
 
 import Hyperbola
 import Intervals
+import Conf as C
 
 average x = s/n
   where n = fromIntegral $ length x
         s = sum x
 
-cheapest hour = hoursPerWeek + 1 - hour
+cheapest hour = C.perWeek + 1 - hour
 
 priceLine :: Float -> Int -> Box
 priceLine mul hour = employedHours <+> hourPriceBox <+> monthPrice
   where employedHours = text $ show $ cheapest hour
         hourPrice = hyperbola mul (fromIntegral hour)
         hourPriceBox = text $ show $ hourPrice
-        monthPrice = text $ show $ 4 * (fromIntegral hoursPerWeek) * hourPrice
+        monthPrice = text $ show $ 4 * (fromIntegral C.perWeek) * hourPrice
 
-priceTable mul = vcat left $ map (priceLine mul) [1..hoursPerWeek]
+priceTable mul = vcat left $ map (priceLine mul) [1..C.perWeek]
 
 printPriceTable mul = printBox $ priceTable mul
 

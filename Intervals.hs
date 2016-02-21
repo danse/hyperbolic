@@ -1,6 +1,7 @@
 module Intervals where
 
 import Hyperbola
+import qualified Conf as C
 
 type Interval = [Int]
 type Multiplier = Float
@@ -53,7 +54,7 @@ multiplierFromRated r = multiplierFromInterval (ratedRate r) (ratedInterval r)
 
 adjustRateToTarget rated = Rated adjustedRate interval
   where interval = ratedInterval rated
-        adjustedRate = (ratedCost rated)/(fromIntegral targetHours)
+        adjustedRate = (ratedCost rated)/(fromIntegral C.target)
 
 averageRate :: Multiplier -> Interval -> Float
 averageRate mul interval = 
@@ -72,19 +73,36 @@ averageRate mul interval =
 -- True
 centeredInterval :: Int -> Interval
 centeredInterval hours = [f..l]
-  where t = quot (totalHours - hours) 2
+  where t = quot (C.total - hours) 2
         f = t
         l = t + hours
 
-dailyHours = 7
-hoursPerWeek = 5 * dailyHours :: Int
-totalHours = hoursPerWeek -- * 4 for months instead of weeks
--- total - target = time for studying etcetera
-targetHours = round (0.8 * (fromIntegral totalHours))
 
+{-
+
+The code here is a bit hard to read, because an hour index also
+corresponds to an amount of hours. The idea here is to pick cheap
+hours for a new allocation as long as they don't conflict with the
+personal development goal
+
+The logic here is, more or less:
+
+- reserve the most expensive hours for personal development
+- allocate busy hours leaving the cheapest slots free
+- allocate requested hours starting from the cheapest slots
+
+-}
 secondAllocation :: Float -> Int -> Int -> Float
-secondAllocation rate busyHours hoursRequested =
-  let firstFreeHour = totalHours-busyHours
-      getMultiplier = multiplierFromRated . adjustRateToTarget
-      mul = getMultiplier (Rated rate [firstFreeHour+1..totalHours])
-  in averageRate mul [firstFreeHour-hoursRequested+1..firstFreeHour]
+secondAllocation rate busy requested
+  | overflowing  = averageRate mul (cheapInterval ++ expensiveInterval)
+  | otherwise    = averageRate mul cheapInterval
+  where 
+    cheapFree = C.target - busy
+    overflowing = requested > cheapFree
+    cheap = if overflowing then cheapFree else requested
+    expensive = requested - cheap
+    cheapestAllocated = C.personal + busy
+    cheapInterval = [C.total-cheap+1..C.total]
+    expensiveInterval = [C.personal-expensive+1..C.personal]
+    getMultiplier = multiplierFromRated . adjustRateToTarget
+    mul = getMultiplier (Rated rate [C.personal+1..cheapestAllocated])
