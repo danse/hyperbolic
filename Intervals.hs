@@ -13,11 +13,17 @@ ratedCost r = (ratedRate r) * (fromIntegral $ length $ ratedInterval r)
 
 combineRated a b = Rated averageRate sumOfIntervals
   where sumOfIntervals = (ratedInterval a) ++ (ratedInterval b)
-        averageRate = ((ratedCost a) + (ratedCost b))/(fromIntegral $ length sumOfIntervals)
+        totalLength = fromIntegral $ length sumOfIntervals
+        averageRate = ((ratedCost a) + (ratedCost b)) / totalLength
 
 instance Monoid Rated where
   mempty = Rated 0 []
   mappend = combineRated
+
+data Allocation = Allocation {
+  allocationRate :: Float,
+  allocationHours :: Int
+  }
 
 {-
 
@@ -46,12 +52,6 @@ multiplierFromRated r = multiplierFromInterval (ratedRate r) (ratedInterval r)
 adjustRateToTarget rated = Rated adjustedRate interval
   where interval = ratedInterval rated
         adjustedRate = (ratedCost rated)/(fromIntegral targetHours)
-
-multiplierFromRateds :: [Rated] -> Float
-multiplierFromRateds rated =
-  let concatenated = mconcat rated
-      adjusted = adjustRateToTarget concatenated
-  in multiplierFromRated adjusted
 
 averageRate :: Float -> Interval -> Float
 averageRate mul interval = 
@@ -83,5 +83,6 @@ targetHours = round (0.8 * (fromIntegral totalHours))
 secondAllocation :: Float -> Int -> Int -> Float
 secondAllocation rate busyHours hoursRequested =
   let firstFreeHour = totalHours-busyHours
-      mul = multiplierFromRateds [Rated rate [firstFreeHour+1..totalHours]]
+      getMultiplier = multiplierFromRated . adjustRateToTarget
+      mul = getMultiplier (Rated rate [firstFreeHour+1..totalHours])
   in averageRate mul [firstFreeHour-hoursRequested+1..firstFreeHour]
