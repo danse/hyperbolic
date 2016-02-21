@@ -70,16 +70,18 @@ averageRate mul interval =
 -- True
 centeredInterval :: Int -> Interval
 centeredInterval hours = [f..l]
-  where t = quot (hoursPerWeek - hours) 2
+  where t = quot (totalHours - hours) 2
         f = t
         l = t + hours
 
 dailyHours = 7
 hoursPerWeek = 5 * dailyHours :: Int
-targetHours = 4 * dailyHours -- the rest for studying etcetera
+totalHours = hoursPerWeek -- * 4 for months instead of weeks
+-- total - target = time for studying etcetera
+targetHours = round (0.8 * (fromIntegral totalHours))
 
 secondAllocation :: Float -> Int -> Int -> Float
 secondAllocation rate busyHours hoursRequested =
-  let firstFreeHour = hoursPerWeek-busyHours
-      mul = multiplierFromRateds [Rated rate [firstFreeHour+1..hoursPerWeek]]
+  let firstFreeHour = totalHours-busyHours
+      mul = multiplierFromRateds [Rated rate [firstFreeHour+1..totalHours]]
   in averageRate mul [firstFreeHour-hoursRequested+1..firstFreeHour]
