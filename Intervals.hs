@@ -106,3 +106,7 @@ secondAllocation rate busy requested
     expensiveInterval = [C.personal-expensive+1..C.personal]
     getMultiplier = multiplierFromRated . adjustRateToTarget
     mul = getMultiplier (Rated rate [C.personal+1..cheapestAllocated])
+
+totalCostTotalTime rate busy totalHours perWeek = (totalCost, totalTime)
+  where totalCost = (secondAllocation rate busy perWeek) * totalHours
+        totalTime = totalHours / (fromIntegral perWeek)
