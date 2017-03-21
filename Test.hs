@@ -30,3 +30,15 @@ main = do
   unless (isSuccess result) exitFailure
   result <- quickCheckResult intervalsInverse
   unless (isSuccess result) exitFailure
+
+{-#
+
+second allocation values should be monothonical increasing
+
+the busy interval does not change depending on the hours requested
+
+the expensive interval is empty under some conditions
+
+secondAllocation x y y > x
+
+#-}
