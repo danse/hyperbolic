@@ -78,12 +78,21 @@ centeredInterval hours = [f..l]
         l = t + hours
 
 
+secondAllocation :: Float -> Int -> Int -> Float
+secondAllocation rate busy requested = averageRate mul hoursToAllocate
+  where 
+    (cheapInt, busyInt, expensiveInt) = intervals busy requested
+    getMultiplier = multiplierFromRated . adjustRateToTarget
+    mul = multiplierFromRated (Rated rate busyInt)
+    hoursToAllocate = cheapInt ++ expensiveInt
+
 {-
 
 The code here is a bit hard to read, because an hour index also
-corresponds to an amount of hours. The idea here is to pick cheap
-hours for a new allocation as long as they don't conflict with the
-personal development goal
+corresponds to an amount of hours, but we want to start picking hours
+from the highest indexes that are also the cheapest. The idea here is
+to pick cheap hours for a new allocation as long as they don't
+conflict with the personal development goal
 
 The logic here is, more or less:
 
@@ -91,22 +100,47 @@ The logic here is, more or less:
 - allocate busy hours leaving the cheapest slots free
 - allocate requested hours starting from the cheapest slots
 
+*: personal dev
+x: busy
+o: allocated
+-: free
+
+ooo---xxxxx------***
+x x-1 x-2 .... 2 1 0
+
 -}
-secondAllocation :: Float -> Int -> Int -> Float
-secondAllocation rate busy requested
-  | overflowing  = averageRate mul (cheapInterval ++ expensiveInterval)
-  | otherwise    = averageRate mul cheapInterval
+intervals :: Int -> Int -> (Interval, Interval, Interval)
+intervals amountBusy requested = (cheapInt, busyInt, expensiveInt)
   where 
-    cheapFree = C.target - busy
-    overflowing = requested > cheapFree
-    cheap = if overflowing then cheapFree else requested
-    expensive = requested - cheap
-    cheapestAllocated = C.personal + busy
-    cheapInterval = [C.total-cheap+1..C.total]
-    expensiveInterval = [C.personal-expensive+1..C.personal]
-    getMultiplier = multiplierFromRated . adjustRateToTarget
-    mul = getMultiplier (Rated rate [C.personal+1..cheapestAllocated])
+    maxCheap = threshold amountBusy
+    overflowing = requested > maxCheap
+    amountCheap = if overflowing then maxCheap else requested
+    amountExpensive = if overflowing then (requested-amountCheap) else 0
+    cheapStart = C.total
+    cheapEnd = cheapStart - amountCheap
+    busyStart = C.total - maxCheap
+    busyEnd = busyStart - amountBusy
+    expensiveStart = busyEnd - 1
+    expensiveEnd = expensiveStart - amountExpensive
+    -- integer lists need to be expressed from the lowest to the
+    -- highest, which is counterintuitive in this case. Also, here we
+    -- try to avoid the case where, for example [5..5] == [5]
+    intervalIf a b = if (a < b) then [a..b] else []
+    cheapInt = intervalIf cheapEnd cheapStart
+    busyInt = intervalIf busyEnd busyStart
+    expensiveInt = intervalIf expensiveEnd expensiveStart
+    
 
 totalCostTotalTime rate busy totalHours perWeek = (totalCost, totalTime)
   where totalCost = (secondAllocation rate busy perWeek) * totalHours
         totalTime = totalHours / (fromIntegral perWeek)
+
+-- | Given the amount of busy hours, return the amount of hours after
+-- which there would be a jump in the rate
+threshold :: Int -> Int
+threshold b = (C.target - b) `div` 2
+
+allThresholdsFrom s
+  | t <= 0 = []
+  | otherwise = t : allThresholdsFrom (t + s)
+  where t = threshold s
