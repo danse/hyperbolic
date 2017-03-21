@@ -52,10 +52,6 @@ multiplierFromInterval rate interval =
 
 multiplierFromRated r = multiplierFromInterval (ratedRate r) (ratedInterval r)
 
-adjustRateToTarget rated = Rated adjustedRate interval
-  where interval = ratedInterval rated
-        adjustedRate = (ratedCost rated)/(fromIntegral C.target)
-
 averageRate :: Multiplier -> Interval -> Float
 averageRate mul interval = 
   let hoursNumber = length interval
@@ -82,7 +78,6 @@ secondAllocation :: Float -> Int -> Int -> Float
 secondAllocation rate busy requested = averageRate mul hoursToAllocate
   where 
     (cheapInt, busyInt, expensiveInt) = intervals busy requested
-    getMultiplier = multiplierFromRated . adjustRateToTarget
     mul = multiplierFromRated (Rated rate busyInt)
     hoursToAllocate = cheapInt ++ expensiveInt
 
