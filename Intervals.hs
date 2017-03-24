@@ -139,3 +139,7 @@ allThresholdsFrom s
   | t <= 0 = []
   | otherwise = t : allThresholdsFrom (t + s)
   where t = threshold s
+
+thresholdAllocation rate busy = show t ++ " hours, " ++ show a ++ " rate"
+  where t = threshold busy
+        a = round $ secondAllocation rate busy t
